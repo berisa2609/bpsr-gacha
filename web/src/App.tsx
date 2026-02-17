@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -7,19 +7,34 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 // -----------------------------
+// Types
+// -----------------------------
+interface Pack {
+	name: string;
+	priceYen: number;
+	gems: number;
+}
+
+interface MinCostResult {
+	costYen: number;
+	gems: number;
+	counts: number[];
+}
+
+// -----------------------------
 // Utilities
 // -----------------------------
-function toNum(v, fallback = 0) {
+function toNum(v: string | number, fallback = 0): number {
 	const n = Number(String(v).replace(/,/g, '').trim());
 	return Number.isFinite(n) ? n : fallback;
 }
 
-function yen(n) {
+function yen(n: number): string {
 	if (!Number.isFinite(n)) return '-';
 	return Math.round(n).toLocaleString('ja-JP') + '円';
 }
 
-function fmt(n, digits = 0) {
+function fmt(n: number, digits = 0): string {
 	if (!Number.isFinite(n)) return '-';
 	return n.toLocaleString('ja-JP', {
 		minimumFractionDigits: digits,
@@ -27,7 +42,7 @@ function fmt(n, digits = 0) {
 	});
 }
 
-function ceilInt(n) {
+function ceilInt(n: number): number {
 	return Math.ceil(n - 1e-12);
 }
 
@@ -35,7 +50,7 @@ function ceilInt(n) {
  * 最小課金（パック整数購入）を探索
  * packs: [{ name, priceYen, gems }]
  */
-function minCostForGems(gemsNeeded, packs) {
+function minCostForGems(gemsNeeded: number, packs: Pack[]): MinCostResult {
 	const need = Math.max(0, ceilInt(gemsNeeded));
 	if (need === 0) {
 		return {
@@ -104,8 +119,8 @@ function minCostForGems(gemsNeeded, packs) {
 	};
 }
 
-function bestUnitPrice(packs) {
-	let best = { unit: Infinity, pack: null };
+function bestUnitPrice(packs: Pack[]): { unit: number; pack: Pack | null } {
+	let best: { unit: number; pack: Pack | null } = { unit: Infinity, pack: null };
 	for (const p of packs) {
 		const unit = p.priceYen / p.gems;
 		if (unit < best.unit) best = { unit, pack: p };
@@ -118,12 +133,12 @@ function bestUnitPrice(packs) {
 // -----------------------------
 export default function SimulatorApp() {
 	// --- Shared settings
-	const [gemPer10, setGemPer10] = useState(1500);
-	const [runoPerGem, setRunoPerGem] = useState(500);
+	const [gemPer10, setGemPer10] = useState<string | number>(1500);
+	const [runoPerGem, setRunoPerGem] = useState<string | number>(500);
 
-	const [pack15000Gems, setPack15000Gems] = useState(7676);
-	const [pack7500Gems, setPack7500Gems] = useState(3808);
-	const [pack4500Gems, setPack4500Gems] = useState(2268);
+	const [pack15000Gems, setPack15000Gems] = useState<string | number>(7676);
+	const [pack7500Gems, setPack7500Gems] = useState<string | number>(3808);
+	const [pack4500Gems, setPack4500Gems] = useState<string | number>(2268);
 
 	const packs = useMemo(
 		() => [
@@ -137,19 +152,19 @@ export default function SimulatorApp() {
 	const gemPerPull = useMemo(() => toNum(gemPer10, 0) / 10, [gemPer10]);
 
 	// --- Will: buy vs gacha
-	const [willPriceRuno, setWillPriceRuno] = useState(2100000);
-	const [willBuyCount, setWillBuyCount] = useState(4);
+	const [willPriceRuno, setWillPriceRuno] = useState<string | number>(2100000);
+	const [willBuyCount, setWillBuyCount] = useState<string | number>(4);
 
 	// gacha rates for Will/Imagine
-	const [aPlusTotal, setAPlusTotal] = useState(4.75); // %
-	const [sShareWithinAPlus, setSShareWithinAPlus] = useState(15); // %
-	const [aPoolSize, setAPoolSize] = useState(14);
-	const [desiredTypes, setDesiredTypes] = useState(1);
-	const [targetCopies, setTargetCopies] = useState(4);
+	const [aPlusTotal, setAPlusTotal] = useState<string | number>(4.75); // %
+	const [sShareWithinAPlus, setSShareWithinAPlus] = useState<string | number>(15); // %
+	const [aPoolSize, setAPoolSize] = useState<string | number>(14);
+	const [desiredTypes, setDesiredTypes] = useState<string | number>(1);
+	const [targetCopies, setTargetCopies] = useState<string | number>(4);
 
 	// --- Costume: collect A tokens/items
-	const [costumeNeedA, setCostumeNeedA] = useState(15);
-	const [costumeATotal, setCostumeATotal] = useState(3.675); // % A total (incl. pity)
+	const [costumeNeedA, setCostumeNeedA] = useState<string | number>(15);
+	const [costumeATotal, setCostumeATotal] = useState<string | number>(3.675); // % A total (incl. pity)
 
 	// -----------------------------
 	// Computations
@@ -545,8 +560,8 @@ export default function SimulatorApp() {
 	);
 }
 
-function QuickCalc({ gemPerPull, packs }) {
-	const [pulls, setPulls] = useState(30);
+function QuickCalc({ gemPerPull, packs }: { gemPerPull: number; packs: Pack[] }) {
+	const [pulls, setPulls] = useState<string | number>(30);
 
 	const res = useMemo(() => {
 		const p = Math.max(0, toNum(pulls, 0));
